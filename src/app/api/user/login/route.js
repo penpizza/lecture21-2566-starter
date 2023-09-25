@@ -1,3 +1,4 @@
+import { getPrisma } from "@/libs/getPrisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -8,7 +9,14 @@ import { NextResponse } from "next/server";
 export const POST = async (request) => {
   const body = await request.json();
   const { username, password } = body;
+  const prisma = getPrisma();
+  const user = await prisma.user.findFirst({
+    where : {
+      username : username,
+    }
+  });
 
+if(!user || !bcrypt.compareSync(password, user.password)){
   return NextResponse.json(
     {
       ok: false,
@@ -16,6 +24,7 @@ export const POST = async (request) => {
     },
     { status: 400 }
   );
+}
 
   //read in db here
 
